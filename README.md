@@ -3,39 +3,12 @@
 [![Go Test](https://github.com/jadiunr/sensu-discord-handler/workflows/Go%20Test/badge.svg)](https://github.com/jadiunr/sensu-discord-handler/actions?query=workflow%3A%22Go+Test%22)
 [![goreleaser](https://github.com/jadiunr/sensu-discord-handler/workflows/goreleaser/badge.svg)](https://github.com/jadiunr/sensu-discord-handler/actions?query=workflow%3Agoreleaser)
 
-# Handler Plugin Template
-
-## Overview
-handler-plugin-template is a template repository which wraps the [Sensu Plugin SDK][2].
-To use this project as a template, click the "Use this template" button from the main project page.
-Once the repository is created from this template, you can use the [Sensu Plugin Tool][9] to
-populate the templated fields with the proper values.
-
-## Functionality
-
-After successfully creating a project from this template, update the `Config` struct with any
-configuration options for the plugin, map those values as plugin options in the variable `options`,
-and customize the `checkArgs` and `executeHandler` functions in [main.go][7].
-
-When writing or updating a plugin's README from this template, review the Sensu Community
-[plugin README style guide][3] for content suggestions and guidance. Remove everything
-prior to `# Sensu Discord Handler` from the generated README file, and add additional context about the
-plugin per the style guide.
-
-## Releases with Github Actions
-
-To release a version of your project, simply tag the target sha with a semver release without a `v`
-prefix (ex. `1.0.0`). This will trigger the [GitHub action][5] workflow to [build and release][4]
-the plugin with goreleaser. Register the asset with [Bonsai][8] to share it with the community!
-
-***
-
 # Sensu Discord Handler
 
 ## Table of Contents
 - [Overview](#overview)
-- [Files](#files)
 - [Usage examples](#usage-examples)
+  - [Help output](#help-output)
 - [Configuration](#configuration)
   - [Asset registration](#asset-registration)
   - [Handler definition](#handler-definition)
@@ -46,11 +19,35 @@ the plugin with goreleaser. Register the asset with [Bonsai][8] to share it with
 
 ## Overview
 
-The Sensu Discord Handler is a [Sensu Handler][6] that ...
-
-## Files
+The Sensu Discord Handler is a [Sensu Event Handler][6] that sends event to a configured Discord channel.  
+As it follows the [Sensu Slack Handler](https://github.com/sensu/sensu-slack-handler), see also.
 
 ## Usage examples
+
+### Help output
+
+```
+The Sensu Go Discord handler for notifying a channel.
+
+Usage:
+  sensu-discord-handler [flags]
+  sensu-discord-handler [command]
+
+Available Commands:
+  help        Help about any command
+  version     Print the version number of this plugin
+
+Flags:
+  -m, --alert-mention string          Specifies the mentions to use if --alert-on-critical is enabled (default "@everyone")
+  -a, --alert-on-critical             The Discord notification will alert the channel with a specified mentions (--alert-mention)
+  -i, --custom-avatar-url string      A URL to an image to use as the user avatar
+  -u, --custom-username string        The username that messages will be sent as
+  -t, --description-template string   The Discord notification output template, in Golang text/template format (default "{{ .Check.Output }}")
+  -h, --help                          help for sensu-discord-handler
+  -w, --webhook-url string            The WebHook URL to send messages to
+
+Use "sensu-discord-handler [command] --help" for more information about a command.
+```
 
 ## Configuration
 
@@ -76,10 +73,14 @@ metadata:
   name: sensu-discord-handler
   namespace: default
 spec:
-  command: sensu-discord-handler --example example_arg
+  command: sensu-discord-handler -u Sensu
   type: pipe
   runtime_assets:
   - jadiunr/sensu-discord-handler
+  secrets:
+  - name: DISCORD_WEBHOOK_URL
+    secret: discord-webhook-url
+  timeout: 10
 ```
 
 #### Proxy Support
@@ -103,7 +104,7 @@ type: CheckConfig
 api_version: core/v2
 metadata:
   annotations:
-    sensu.io/plugins/sensu-discord-handler/config/example-argument: "Example change"
+    sensu.io/plugins/sensu-discord-handler/config/alert-mention: "<@!1234567890>"
 [...]
 ```
 
