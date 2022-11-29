@@ -33,7 +33,7 @@ const (
 
 	defaultTemplate     = "{{ .Check.Output }}"
 	defaultAlert        = false
-	defaultAlertMention = "everyone"
+	defaultAlertMention = "@everyone"
 )
 
 var (
@@ -162,7 +162,7 @@ func messageStatus(event *types.Event) string {
 		return "Resolved"
 	case 2:
 		if plugin.discordAlertCritical {
-			return fmt.Sprintf("@%s Critical", plugin.discordAlertMention)
+			return fmt.Sprintf("%s Critical", plugin.discordAlertMention)
 		} else {
 			return "Critical"
 		}
