@@ -116,35 +116,6 @@ func checkArgs(_ *types.Event) error {
 	return nil
 }
 
-func formattedEventAction(event *types.Event) string {
-	switch event.Check.Status {
-	case 0:
-		return "RESOLVED"
-	default:
-		return "ALERT"
-	}
-}
-
-func chomp(s string) string {
-	return strings.Trim(strings.Trim(strings.Trim(s, "\n"), "\r"), "\r\n")
-}
-
-func eventKey(event *types.Event) string {
-	return fmt.Sprintf("%s/%s", event.Entity.Name, event.Check.Name)
-}
-
-func eventSummary(event *types.Event, maxLength int) string {
-	output := chomp(event.Check.Output)
-	if len(event.Check.Output) > maxLength {
-		output = output[0:maxLength] + "..."
-	}
-	return fmt.Sprintf("%s:%s", eventKey(event), output)
-}
-
-func formattedMessage(event *types.Event) string {
-	return fmt.Sprintf("%s - %s", formattedEventAction(event), eventSummary(event, 100))
-}
-
 func messageColor(event *types.Event) int {
 	switch event.Check.Status {
 	case 0:
