@@ -142,6 +142,14 @@ func messageStatus(event *types.Event) string {
 	}
 }
 
+func limitTextLength(text string, limit int) string {
+	textRune := []rune(text)
+	if len(textRune) > limit {
+		return string(textRune[0:limit-3]) + "..."
+	}
+	return text
+}
+
 func messageEmbed(event *types.Event) *discordgo.MessageEmbed {
 	description, err := templates.EvalTemplate("description", plugin.discordDescriptionTemplate, event)
 	if err != nil {
@@ -151,7 +159,7 @@ func messageEmbed(event *types.Event) *discordgo.MessageEmbed {
 	description = strings.Replace(description, `\n`, "\n", -1)
 	embed := &discordgo.MessageEmbed{
 		Title:       "Description",
-		Description: description,
+		Description: limitTextLength(description, 4096),
 		Color:       messageColor(event),
 		Fields: []*discordgo.MessageEmbedField{
 			{
