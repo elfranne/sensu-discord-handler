@@ -7,6 +7,12 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [0.0.2] - 2023-03-23
+
+### Added
+- Limit message length of description to 4096
+- Improve `TestMain()`
+
 ## [0.0.1] - 2022-11-30
 
 ### Added
