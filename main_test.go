@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sensu/sensu-go/types"
+	corev2 "github.com/sensu/core/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +19,7 @@ func TestMain(t *testing.T) {
 		_ = os.Remove(file.Name())
 	}()
 
-	event := types.FixtureEvent("entity1", "check1")
+	event := corev2.FixtureEvent("entity1", "check1")
 	eventJSON, _ := json.Marshal(event)
 	_, err := file.WriteString(string(eventJSON))
 	require.NoError(t, err)

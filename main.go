@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/sensu-community/sensu-plugin-sdk/sensu"
-	"github.com/sensu-community/sensu-plugin-sdk/templates"
-	"github.com/sensu/sensu-go/types"
+	"github.com/sensu/sensu-plugin-sdk/templates"
+	"github.com/sensu/sensu-plugin-sdk/sensu"
+	corev2 "github.com/sensu/core/v2"
 )
 
 // Config represents the handler plugin config.
@@ -45,8 +45,8 @@ var (
 		},
 	}
 
-	options = []*sensu.PluginConfigOption{
-		{
+	options = []sensu.ConfigOption{
+		&sensu.PluginConfigOption[string]{
 			Path:      webHookURL,
 			Env:       "DISCORD_WEBHOOK_URL",
 			Argument:  webHookURL,
@@ -55,7 +55,7 @@ var (
 			Usage:     "The WebHook URL to send messages to",
 			Value:     &plugin.discordWebHookURL,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      customUsername,
 			Env:       "DISCORD_CUSTOM_USERNAME",
 			Argument:  customUsername,
@@ -64,7 +64,7 @@ var (
 			Usage:     "The username that messages will be sent as",
 			Value:     &plugin.discordCustomUsername,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      customAvatarURL,
 			Env:       "DISCORD_CUSTOM_AVATAR_URL",
 			Argument:  customAvatarURL,
@@ -73,7 +73,7 @@ var (
 			Usage:     "A URL to an image to use as the user avatar",
 			Value:     &plugin.discordCustomAvatarURL,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      descriptionTemplate,
 			Env:       "DISCORD_DESCRIPTION_TEMPLATE",
 			Argument:  descriptionTemplate,
@@ -82,7 +82,7 @@ var (
 			Usage:     "The Discord notification output template, in Golang text/template format",
 			Value:     &plugin.discordDescriptionTemplate,
 		},
-		{
+		&sensu.PluginConfigOption[bool]{
 			Path:      alertCritical,
 			Env:       "DISCORD_ALERT_ON_CRITICAL",
 			Argument:  alertCritical,
@@ -91,7 +91,7 @@ var (
 			Usage:     "The Discord notification will alert the channel with a specified mentions (--alert-mention)",
 			Value:     &plugin.discordAlertCritical,
 		},
-		{
+		&sensu.PluginConfigOption[string]{
 			Path:      alertMention,
 			Env:       "DISCORD_ALERT_MENTION",
 			Argument:  alertMention,
@@ -104,11 +104,11 @@ var (
 )
 
 func main() {
-	handler := sensu.NewGoHandler(&plugin.PluginConfig, options, checkArgs, executeHandler)
+	handler := sensu.NewHandler(&plugin.PluginConfig, options, checkArgs, executeHandler)
 	handler.Execute()
 }
 
-func checkArgs(_ *types.Event) error {
+func checkArgs(_ *corev2.Event) error {
 	if len(plugin.discordWebHookURL) == 0 {
 		return fmt.Errorf("--%s or DISCORD_WEBHOOK_URL environment variable is required", webHookURL)
 	}
@@ -116,7 +116,7 @@ func checkArgs(_ *types.Event) error {
 	return nil
 }
 
-func messageColor(event *types.Event) int {
+func messageColor(event *corev2.Event) int {
 	switch event.Check.Status {
 	case 0:
 		return 3061373
@@ -127,7 +127,7 @@ func messageColor(event *types.Event) int {
 	}
 }
 
-func messageStatus(event *types.Event) string {
+func messageStatus(event *corev2.Event) string {
 	switch event.Check.Status {
 	case 0:
 		return "Resolved"
@@ -150,7 +150,7 @@ func limitTextLength(text string, limit int) string {
 	return text
 }
 
-func messageEmbed(event *types.Event) *discordgo.MessageEmbed {
+func messageEmbed(event *corev2.Event) *discordgo.MessageEmbed {
 	description, err := templates.EvalTemplate("description", plugin.discordDescriptionTemplate, event)
 	if err != nil {
 		fmt.Printf("%s: Error processing template: %s", plugin.PluginConfig.Name, err)
@@ -183,7 +183,7 @@ func messageEmbed(event *types.Event) *discordgo.MessageEmbed {
 	return embed
 }
 
-func executeHandler(event *types.Event) error {
+func executeHandler(event *corev2.Event) error {
 	embedJSON, err := json.Marshal(messageEmbed(event))
 	if err != nil {
 		return fmt.Errorf("%v", err)
