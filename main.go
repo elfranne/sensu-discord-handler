@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	
 	"github.com/sensu/sensu-plugin-sdk/templates"
 	"github.com/sensu/sensu-plugin-sdk/sensu"
 	corev2 "github.com/sensu/core/v2"
